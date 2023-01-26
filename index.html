@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="./style.css" />
+    <title>Weather Report</title>
+  </head>
+  <body class="grid">
+    <header role="banner" class="grid-item">
+      <h1>W-R</h1>
+    </header>
+    <main role="main" class="grid-item"> 
+      <div class="subgrid">
+        <div class="subgrid-item">
+          <div class="panel">
+            <h2>Search</h2>
+            <form>
+              <label for="city-search">Enter a city name to search:</label>
+              <br>
+              <input type="text" name="city-search">
+              </input>
+              <button>Submit</button>
+            </form>
+            <br>
+            <label class="hidden" for="city-list">Or choose a city from the list:</label>
+            <ul id="city-list" name="city-list">
+            </ul>
+          </div>
+        </div>
+        <div class="subgrid-item">
+          <div class="panel">
+            <h2>Today's Weather</h2>
+            <p>Today Card here</p>
+          </div>
+        </div>
+        <div class="subgrid-item">
+          <div class="panel">
+            <h2>Five-day Forecast</h2>
+            <p>Five day cards here.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer role="copyright" class="grid-item">
+      <h2>Footer</h2>
+      <p>
+      </p>
+    </footer>
+  </body>
+</html>
