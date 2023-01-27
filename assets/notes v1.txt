@@ -1,0 +1,36 @@
+V1 Weather report
+User inputs city name
+	if name is already on the list =>	inform user - info - city already
+						retrieve locally-stored coordinates
+						create weather request
+						fetch weather request
+
+
+	if name is not in the list =>		create coordinate request
+						fetch coordinate request
+
+User selects listed city =>	retrieve locally-stored coordinates
+					create weather request
+					fetch weather request
+
+Coordinate request returned
+	if unsuccessful	=>		inform user - duff city
+					clear input panel
+
+	if successful =>		add city name locally-stored coordinates
+					create list panel		// if request fails not listed			
+					create weather request
+					fetch weather request
+
+Weather request returned
+	if unsuccessful =>	retry
+
+        if successful => 	create weather panels
+				render page
+
+
+weather call
+
+
+direct geocoding format
+http://api.openweathermap.org/geo/1.0/direct?q={city name},{state code},{country code}&limit={limit}&appid={API key}

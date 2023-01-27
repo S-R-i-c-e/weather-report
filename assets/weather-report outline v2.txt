@@ -1,0 +1,26 @@
+weather-report outline v2
+
+User inputs (cityName)
+    if isListed(cityStorage, cityName)
+        message("city listed")
+        //fetch known city weather
+        coordinates = getcoordinates(cityStorage, cityName)
+        weatherRequestURL = createWeatherRequestURL(coordinates)
+        weatherPromise = fetchWeather(weatherRequestURL)
+    if not(isListed(cityStorage, cityName))
+        coordinaterequestURL = createCoordinateRequest(cityName)
+        coordinatePromise = fetchCoordinates(coordinaterequestURL)
+
+User selects listed (cityName)
+        //fetch known city weather
+        coordinates = getcoordinates(cityStorage, cityName)
+        weatherRequestURL = createWeatherRequestURL(coordinates)
+        weatherPromise = fetchWeather(weatherRequestURL)   
+
+Coordinate request returned (coordinate_data)
+        coordinateDecode = decodeCoordinateData(coordinate_data)
+        if sucessful(coordinateDecode)
+            newCityStorage = (coordinateDecode, cityStorage)
+            store(newCityStorage)
+            [TODO] will the storage object be {cityName: $,
+                                                coordinateObject: coordObj}
