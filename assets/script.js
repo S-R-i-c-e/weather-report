@@ -47,16 +47,25 @@ class CityCoordinates {
 class WeatherReports {
 //    constructor(cityName, [...openWeatherList]) {
     //    this._cityName = cityName;
-    constructor(cityName, openWeatherList) {
-        console.log(`constructing weather report`)
-        this._cityName = cityName;
-        this._reports = [openWeatherList[0],
-                        openWeatherList[7],
-                        openWeatherList[15],
-                        openWeatherList[23],
-                        openWeatherList[31],
-                        openWeatherList[39]];
+    constructor(openWeatherData) {
+        this._cityName = openWeatherData.city.name;
+        this._reports = [openWeatherData.list[0],
+                        openWeatherData.list[7],
+                        openWeatherData.list[15],
+                        openWeatherData.list[23],
+                        openWeatherData.list[31],
+                        openWeatherData.list[39]];
     }
+    // constructor(cityName, openWeatherList) {
+    //     console.log(`constructing weather report`)
+    //     this._cityName = cityName;
+    //     this._reports = [openWeatherList[0],
+    //                     openWeatherList[7],
+    //                     openWeatherList[15],
+    //                     openWeatherList[23],
+    //                     openWeatherList[31],
+    //                     openWeatherList[39]];
+    // }
     set cityName(cityName) {        // unsure of the need for setters and getters w.r.t. constructor?
         this._cityName = cityName;  // had an error when playing but may have misinterpreted the same
     }
@@ -69,9 +78,39 @@ class WeatherReports {
     get reports() {
         return this._reports;
     }
+    /* Current report
+        the following are required from the weather object 
+        i) obj.city.name -> String
+        ii) obj.list[n].dt_txt - "YYYY-MM-DD HH:MM:SS";
+        iii) obj.list[n].weather[0].icon - e.g. '01d'
+            icon source is `http://openweathermap.org/img/wn/${iconCode}@2x.png`
+        iv) obj.list[n].main.temp - Celcius set in query
+        v) obj.list[n].main.humidity
+        vi) obj.list[n].speed - e.g. 3.94 units?
+    */
+    get currentReport() {
+        return {
+            city: this._cityName,
+            date: this._reports[0].dt_txt,
+            imgSrc: this._reports[0].weather[0].icon,
+            temperature: this._reports[0].main.temp,
+            humidity: this._reports[0].main.humidity,
+            windSpeed: this._reports[0].wind.speed,
+        }
+    }
     toString() {
         return `report: ${this._reports}`;  // test with single report
     }
+
+}
+// convertDate - change openWeather date and time string and return UK style date string
+function convertDate(openDate) {
+// [TODO] 
+    return `openDate`;      
+}
+function createIconSrc(icon) {
+// [TODO]
+    return `icon image lookup string`
 }
 // citySearch() : responds to search submit button
 function citySearchInput() {
@@ -113,6 +152,7 @@ function fetchWeather(queryURL) {
 
 function processCoordinates(rawCoordinates) {
 //    console.log(rawCoordinates);
+// [TODO] - this should better be done in the constructor
     let newCoordinates = new CityCoordinates(
         rawCoordinates[0].name,
         rawCoordinates[0].country,
@@ -125,11 +165,13 @@ function testArrayPass(test) {
     console.log(test[0]);
 }
 function processWeather(rawWeatherData) {
-//    console.log(rawWeatherData.list);
-    let report = new WeatherReports(rawWeatherData.city.name, rawWeatherData.list);
-    console.log(report.cityName);
-    console.log(report.reports);
+//    console.log(rawWeatherData);
+//    let report = new WeatherReports(rawWeatherData.city.name, rawWeatherData.list);
+    let report = new WeatherReports(rawWeatherData);
+    // console.log(report.cityName);
+    // console.log(report.reports);
 //    testArrayPass(rawWeatherData.list);
+    console.log(report.currentReport);
 }
 
 // test cityCoordinates
@@ -155,19 +197,13 @@ b) Five-days
     iv) temperature,
     v) humidity.
 
-weather object returns
-
+the following are required from the weather object 
 i) obj.city.name -> String
-
 ii) obj.list[n].dt_txt - "YYYY-MM-DD HH:MM:SS";
-
 iii) obj.list[n].weather[0].icon - e.g. '01d'
     icon source is `http://openweathermap.org/img/wn/${iconCode}@2x.png`
-
-iv) obj.list[n].main.temp - Kelvin {TODO}
-
+iv) obj.list[n].main.temp - Celcius set in query
 v) obj.list[n].main.humidity
-
 vi) obj.list[n].speed - e.g. 3.94 units?
 
 
