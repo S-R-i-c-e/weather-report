@@ -12,11 +12,17 @@ let search = document.getElementById("city-input");
 
 // cityCoordinates class to contain Open Weather city coordinates.
 class CityCoordinates {
-    constructor(city, country, longitude, latitude) {
-        this._city = city;
-        this._country = country;
-        this._coordinates = [longitude, latitude];
+    constructor(coordinateData) {
+        this._city = coordinateData[0].name;
+        this._country = coordinateData[0].country;
+        this._coordinates = [coordinateData[0].lon, coordinateData[0].lat];       
     }
+    // original constructor
+    // constructor(city, country, longitude, latitude) {
+    //     this._city = city;
+    //     this._country = country;
+    //     this._coordinates = [longitude, latitude];
+    // }
     set city(cityName) {
         this._city = cityName;
     }
@@ -89,6 +95,8 @@ class WeatherReports {
         vi) obj.list[n].speed - e.g. 3.94 units?
     */
     get currentReport() {
+        // TODO - sanitise the weather 
+        // round temperature and wind speed
         return {
             city: this._cityName,
             date: this._reports[0].dt_txt,
@@ -152,13 +160,14 @@ function fetchWeather(queryURL) {
 
 function processCoordinates(rawCoordinates) {
 //    console.log(rawCoordinates);
-// [TODO] - this should better be done in the constructor
-    let newCoordinates = new CityCoordinates(
-        rawCoordinates[0].name,
-        rawCoordinates[0].country,
-        rawCoordinates[0].lon,
-        rawCoordinates[0].lat);
-//    console.log(newCoordinates.toString());
+// [TODO] - this should better be done in the constructor !! This is the new construction call !!
+    let newCoordinates = new CityCoordinates(rawCoordinates);
+    // let newCoordinates = new CityCoordinates(
+    //     rawCoordinates[0].name,
+    //     rawCoordinates[0].country,
+    //     rawCoordinates[0].lon,
+    //     rawCoordinates[0].lat);
+    console.log(newCoordinates.toString());
     createWeatherRequest(newCoordinates);
 }
 function testArrayPass(test) {
