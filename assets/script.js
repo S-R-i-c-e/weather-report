@@ -217,6 +217,9 @@ function createSearchedCityPanelHTMLString() {
     }
     return panel;
 }
+function fiveDaysWeather(weatherReport) {
+    console.log("it's weather!")
+}
 
 // Sorry code, dead code, tears and revived code below
 /* test local storage */
