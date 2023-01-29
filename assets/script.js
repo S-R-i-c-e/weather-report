@@ -6,22 +6,24 @@ let lon = undefined;
 
 // Data related variables and code
 const localCities = "knownCities"; // name of locally stored cities object
-let knownCities = JSON.parse(localStorage.getItem(localCities) || "[]");; // 'list' of previously searched cities - stores CityCoordinates instances
- 
+let knownCities = JSON.parse(localStorage.getItem(localCities) || "[]"); // 'list' of previously searched cities - stores CityCoordinates instances
+
 // HTML document handles
 let searchHTML = document.getElementById("city-input");
 let currentWeatherHTML = document.getElementById("current-weather-here");
+let searchedListHTML = document.getElementById("city-list");
+
+// refresh the search panel at the start
+updateSearchedCityPanel();
+
+// cityCoordinates class to contain Open Weather city coordinates.
 class CityCoordinates {
     constructor(coordinateData) {
         this._city = coordinateData[0].name;
-        this._country = coordinateData[0].country;
         this._coordinates = [coordinateData[0].lon, coordinateData[0].lat];       
     }
     set city(cityName) {
         this._city = cityName;
-    }
-    set country(countryName) {
-        this._country = countryName;
     }
     set coordinates(coordinates) {
         this._coordinates = coordinates;
@@ -37,7 +39,6 @@ class CityCoordinates {
     }
     toString() {
         return `city: ${this._city}
-            - country ${this._country}
             - longitude: ${this.longitude}
             - latitude: ${this.latitude}.`
     }
@@ -67,12 +68,10 @@ class WeatherReports {
     get reports() {
         return this._reports;
     }
-    /* Current report()
-        the following are required from the weather object 
+    /* Current report() the following are required from the weather object 
         i) obj.city.name -> String
         ii) obj.list[n].dt_txt - "YYYY-MM-DD HH:MM:SS"; --> converted to UK date only
-        iii) obj.list[n].weather[0].icon - e.g. '01d'
-            icon source is `http://openweathermap.org/img/wn/${iconCode}@2x.png` using function
+        iii) obj.list[n].weather[0].icon - e.g. '01d' - icon source is `http://openweathermap.org/img/wn/${iconCode}@2x.png` using function
         iv) obj.list[n].main.temp - Celcius set in query  --> rounded
         v) obj.list[n].main.humidity
         vi) obj.list[n].speed - e.g. 3.94 units?  --> rounded - display units below guessed
@@ -105,6 +104,18 @@ function citySearchInput() {
     searchHTML.elements[0].value = "";              // clear the input field
     processCityName(cityName);
 }
+
+function processCityName(uncheckedCity) {
+    let cityKnown = checkIfCityIsKnown(uncheckedCity);
+    if (cityKnown) {
+        console.log("city known");
+        createWeatherRequest(cityKnown);
+    } else {
+        console.log("city not known");
+        createCoordinateRequest(uncheckedCity);
+    }
+}
+
 // checkIfCityIsKnown(string) loop through the array of stored cityname and coordsinate object
 // return the coordinate object if it matches the name, else return false
 function checkIfCityIsKnown(cityString) {
@@ -114,17 +125,11 @@ function checkIfCityIsKnown(cityString) {
             cityKnown = city;
         }
     }
+    console.log("city check");
+    console.log(cityKnown);
     return cityKnown;
 }
-// processCityName : test if a coordinate request is required
-function processCityName(uncheckedCity) {
-    let cityCoordinates = checkIfCityIsKnown(uncheckedCity);
-    if(cityCoordinates) {
-        createWeatherRequest(cityCoordinates);
-    } else {
-        createCoordinateRequest(uncheckedCity);
-    }
-}
+
 // createCoodinateRequest(city name string) : create a coordinate request string and pass it on to the specific fetch procedure
 function createCoordinateRequest(unknownCity) {
     let apiGeocodingDirectCall = `http://api.openweathermap.org/geo/1.0/direct?q=${unknownCity}&limit=${limit}&appid=${apiKey}`;
@@ -136,24 +141,26 @@ function fetchCoordinates(queryURL) {
         .then(response => response.json())
         .then(coordinateData => processCoordinates(coordinateData));
 }
-// create an object to hold city and it coordinates
-function newCityCoordinates(coordinateData) {
-    return {
-        city : coordinateData[0].name,
-        longitude : coordinateData[0].lon,
-        latitude : coordinateData[0].lat,       
-    } 
-}
 // process coordinate data object returned from openWeather Geolocation query
 function processCoordinates(rawCoordinates) {
-    let newCoordinates = newCityCoordinates(rawCoordinates); // create object to contain the data we want {name, longitude, latitude}
+    console.log(rawCoordinates);
+    let newCoordinates = new CityCoordinates(rawCoordinates); // create object to contain the data we want {name, longitude, latitude}
     addToKnownCities(newCoordinates);       // add coordinates to the list and storage
     createWeatherRequest(newCoordinates);
 }
-// addToKnownCities(coordinate object) : add to the variable list and to storage
-function addToKnownCities(coordObject) {
-    knownCities.push(coordObject);
-    localStorage.setItem(localCities, knownCities);
+// addToKnownCities(OpenWeatherCoordinate object - push onto array of known, restore knwn, refresh panel)
+function addToKnownCities(cityCoordinates) { // TODO two types of cityCoordinates - requires overloaded contructor
+    knownCities.push({city: cityCoordinates.city,
+                    longitude: cityCoordinates.longitude,
+                    latitude: cityCoordinates.latitude,
+                });
+    localStorage.setItem(localCities, JSON.stringify(knownCities));
+    updateSearchedCityPanel();
+    }
+function updateSearchedCityPanel() {
+    let freshSearchPanel = createSearchedCityPanelHTMLString();
+    searchedListHTML.innerHTML = "";    // clear the panel
+    searchedListHTML.innerHTML = freshSearchPanel; // refresh
 }
 // createWeatherReport(CityCoordinates object) : create a forecast request string and pass it on to the specific fetch procedure
 function createWeatherRequest(coordinatesObject) {
@@ -170,44 +177,30 @@ function fetchWeather(queryURL) {
 }
 // processWeather(data object returned from OpenWeather query) :  
 function processWeather(rawWeatherData) {
-    let fiveDayReport = newWeatherReport(rawWeatherData);               // WeatherReports class constructor extracts pertinent data
-    let currentReport = createCurrentReport(fiveDayReport[0]);
-    let currentWeatherHTMLString = createrCurrentWeatherPanel(currentReport); // WeatherReports method creates HTML string for the current weather panel
+    let fiveDayReport = new WeatherReports(rawWeatherData);
+        // WeatherReports class constructor extracts pertinent data
+    let currentReport = fiveDayReport.currentReport;
+    let currentWeatherHTMLString = createCurrentWeatherPanel(currentReport); // WeatherReports method creates HTML string for the current weather panel     
     currentWeatherHTML.innerHTML = "";                                              // clear the current weather panel
     currentWeatherHTML.innerHTML = currentWeatherHTMLString;                        // set the current weather panel
-}
-function newWeatherReport(openWeatherData) {
-    return {
-        cityName = openWeatherData.city.name;
-        // open weather returns 40 x 3-hourly weather reports for a given location
-        // the class holds six evenly spaced reports to represent current and five day forecasts
-        reports = [openWeatherData.list[0],
-                    openWeatherData.list[7],
-                    openWeatherData.list[15],
-                    openWeatherData.list[23],
-                    openWeatherData.list[31],
-                    openWeatherData.list[39]];
-    }
-}
-function CreateCurrentReport(fiveDayForecastObject) {
-    return {
-        city: this._cityName,
-        date: convertDate(this._reports[0].dt_txt),
-        imgSrc: createIconSrc(this._reports[0].weather[0].icon),
-        temperature: Math.round(this._reports[0].main.temp),
-        humidity: this._reports[0].main.humidity,
-        windSpeed: Math.round(this._reports[0].wind.speed),
-    }
 }
 // createCurrentWeatherPanel(tailored-current-weather-data) create HTML elements string to be inserted .innnerHTL into current weather panel
 function createCurrentWeatherPanel(currentWeatherObject) {
     return `<p>${currentWeatherObject.city} ${currentWeatherObject.date}</p>
             <img src="${currentWeatherObject.imgSrc}">          
-            <p><span>Temp - ${currentWeatherObject.temperature}°C</span>
-            <p>humidity - ${currentWeatherObject.humidity}%</p>
-            <p>wind speed -  ${currentWeatherObject.windSpeed}m/s</p>`
+            <p><span>Temp : ${currentWeatherObject.temperature}°C</span>
+            <p>humidity : ${currentWeatherObject.humidity}%</p>
+            <p>wind speed : ${currentWeatherObject.windSpeed}m/s</p>`
+}
+function createSearchedCityPanelHTMLString() {
+    let panel = "";
+    for(let city of knownCities) {
+        panel += `<li>${city.city}</li>`;
+    }
+    return panel;
 }
 
+// Sorry dead code and tears and revived code below
 /* test local storage */
 // let test = new VisitedCities;
 // console.log(test);
