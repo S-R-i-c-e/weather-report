@@ -1,5 +1,4 @@
-// openWeatherMap.org key and variables used to create queries
-const apiKey = "e9b136f83aba716833b8671f60447800";
+// variables used to create queries
 const limit = "2"; // limit returned names from place name request
 let lat = undefined;
 let lon = undefined;
