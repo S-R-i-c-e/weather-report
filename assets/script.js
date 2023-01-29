@@ -1,6 +1,6 @@
 // openWeatherMap.org key and variables used to create queries
 const apiKey = "e9b136f83aba716833b8671f60447800";
-const limit = "10";
+const limit = "2"; // limit returned names from place name request
 let lat = undefined;
 let lon = undefined;
 
@@ -10,8 +10,9 @@ let knownCities = JSON.parse(localStorage.getItem(localCities) || "[]"); // 'lis
 
 // HTML document handles
 let searchHTML = document.getElementById("city-input");
-let currentWeatherHTML = document.getElementById("current-weather-here");
 let searchedListHTML = document.getElementById("city-list");
+let currentWeatherHTML = document.getElementById("current-weather-here");
+let fiveDayWeatherHTML = document.getElementById("five-day-forecast");
 
 // cityCoordinates class to contain Open Weather city coordinates.
 class CityCoordinates {
@@ -81,6 +82,17 @@ class WeatherReports {
             temperature: Math.round(this._reports[0].main.temp),
             humidity: this._reports[0].main.humidity,
             windSpeed: Math.round(this._reports[0].wind.speed),
+        }
+    }
+    /* forecast(1..5) : as currentReport, but without windspeed and city name,
+     and with index 1..5 representing the five forecasts selected by the constructor */
+    forecast(forecastIndex) {
+        return {
+            date: convertDate(this._reports[forecastIndex].dt_txt),
+            imgSrc: createIconSrc(this._reports[forecastIndex].weather[0].icon),
+            temperature: Math.round(this._reports[forecastIndex].main.temp),
+            humidity: this._reports[forecastIndex].main.humidity,
+           
         }
     }
 }
@@ -180,9 +192,13 @@ function fetchWeather(queryURL) {
 }
 // processWeather(data object returned from OpenWeather query) :  
 function processWeather(rawWeatherData) {
-    let fiveDayReport = new WeatherReports(rawWeatherData);
-        // WeatherReports class constructor extracts pertinent data
-    let currentReport = fiveDayReport.currentReport;
+    let fiveDayReport = new WeatherReports(rawWeatherData); // WeatherReports class constructor extracts pertinent data
+    todaysWeather(fiveDayReport);
+    fiveDaysWeather(fiveDayReport);
+
+}
+function todaysWeather(weatherReport) {
+    let currentReport = weatherReport.currentReport;
     let currentWeatherHTMLString = createCurrentWeatherPanel(currentReport); // WeatherReports method creates HTML string for the current weather panel     
     currentWeatherHTML.innerHTML = "";                                              // clear the current weather panel
     currentWeatherHTML.innerHTML = currentWeatherHTMLString;                        // set the current weather panel
@@ -213,7 +229,7 @@ a) Current
     i) city name,
     ii) date,
     iii) icon representing the weather,
-    iv) temeprature,
+    iv) temperature,
     v) humidity,
     vi) wind speed.
 b) Five-days
@@ -248,106 +264,6 @@ check for inclusion
 Class
 
 /*
-
-// cityCoordinates class to contain Open Weather city coordinates.
-class CityCoordinates {
-    constructor(coordinateData) {
-        this._city = coordinateData[0].name;
-        this._country = coordinateData[0].country;
-        this._coordinates = [coordinateData[0].lon, coordinateData[0].lat];       
-    }
-    set city(cityName) {
-        this._city = cityName;
-    }
-    set country(countryName) {
-        this._country = countryName;
-    }
-    set coordinates(coordinates) {
-        this._coordinates = coordinates;
-    }
-    get city() {
-        return this._city;
-    }
-    get longitude() {
-        return this._coordinates[0];
-    }
-    get latitude() {
-        return this._coordinates[1];
-    }
-    toString() {
-        return `city: ${this._city}
-            - country ${this._country}
-            - longitude: ${this.longitude}
-            - latitude: ${this.latitude}.`
-    }
-}
-// WeatherReports class to contain weather reports for a page of the app
-class WeatherReports {
-    constructor(openWeatherData) {
-        this._cityName = openWeatherData.city.name;
-        // open weather returns 40 x 3-hourly weather reports for a given location
-        // the class holds six evenly spaced reports to represent current and five day forecasts
-        this._reports = [openWeatherData.list[0],
-                        openWeatherData.list[7],
-                        openWeatherData.list[15],
-                        openWeatherData.list[23],
-                        openWeatherData.list[31],
-                        openWeatherData.list[39]];
-    }
-    set cityName(cityName) {
-        this._cityName = cityName;
-    }
-    get cityName() {
-        return this._cityName;
-    }
-    set reports(reports) {
-        this._reports = reports;
-    }
-    get reports() {
-        return this._reports;
-    }
-    /* Current report()
-        the following are required from the weather object 
-        i) obj.city.name -> String
-        ii) obj.list[n].dt_txt - "YYYY-MM-DD HH:MM:SS"; --> converted to UK date only
-        iii) obj.list[n].weather[0].icon - e.g. '01d'
-            icon source is `http://openweathermap.org/img/wn/${iconCode}@2x.png` using function
-        iv) obj.list[n].main.temp - Celcius set in query  --> rounded
-        v) obj.list[n].main.humidity
-        vi) obj.list[n].speed - e.g. 3.94 units?  --> rounded - display units below guessed
-    
-    get currentReport() { // not sure if this is strictly a getter - but it works
-        return {
-            city: this._cityName,
-            date: convertDate(this._reports[0].dt_txt),
-            imgSrc: createIconSrc(this._reports[0].weather[0].icon),
-            temperature: Math.round(this._reports[0].main.temp),
-            humidity: this._reports[0].main.humidity,
-            windSpeed: Math.round(this._reports[0].wind.speed),
-        }
-    }
-}
-
-// prevoiusly searched cities code - storage, search, appending, creation of HTML list, etc.
-// addKnownCity(CityCoordinates object) : code to handle previously searched cities - storage, search, appending, creation of HTML list, etc.
-function addKnownCity(cityCoordinate) {
-    let knownCities = JSON.parse(localStorage.getItem(localCities) || "[]");; // retrieve previously searched cities if it existes else create empty array
-    knownCities.push(cityCoordinate);       // add the new city object to the array
-    localStorage.removeItem(localCities);   // delete the old array - returns undefined if it didn't exist
-    localStorage.setItem(localCities, JSON.stringify(knownCities));      // save the updated array
-}
-// searchKnownCities(city name string) : retrieve the local list, seach for the given name, return the coordinate object...
-// if it is found in the list, else return false
-function searchKnownCities(cityNameString) {
-    let knownCities = JSON.parse(localStorage.getItem(localCities) || "[]"); // retrieve previously searched cities if it existes else create empty array
-    var cityFound = false;          // there is probably a better way to search - set return value to fail
-    for(let coordObject of knownCities) {
-        if(coordObject.city == cityNameString) {    // attempt to match city names
-            cityFound = coordObject;                // city found - return the coordinates object
-        }
-    }
-    return cityFound;
-}
 
 // better test this
 
