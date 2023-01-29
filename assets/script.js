@@ -13,9 +13,6 @@ let searchHTML = document.getElementById("city-input");
 let currentWeatherHTML = document.getElementById("current-weather-here");
 let searchedListHTML = document.getElementById("city-list");
 
-// refresh the search panel at the start
-updateSearchedCityPanel();
-
 // cityCoordinates class to contain Open Weather city coordinates.
 class CityCoordinates {
     constructor(coordinateData) {
@@ -97,6 +94,16 @@ function createIconSrc(icon) {
     //weather icon image src
     return `http://openweathermap.org/img/wn/${icon}@2x.png`
 }
+// LISTENERS
+// refresh the search panel at the start
+window.onload = (event) => {
+    updateSearchedCityPanel();
+  };
+searchedListHTML.addEventListener("click", function(event) {
+    if(event.target.tagName === 'LI') {
+        createWeatherRequest(cityIsKnown(event.target.textContent)); // TODO logic a little untidy
+    }
+})
 // LOGIC STARTS WITH TEXT INPUT CITY NAME OR CITY PIKED FROM LIST
 // citySearchInput() : responds to search submit button
 function citySearchInput() {
@@ -106,7 +113,7 @@ function citySearchInput() {
 }
 
 function processCityName(uncheckedCity) {
-    let cityKnown = checkIfCityIsKnown(uncheckedCity);
+    let cityKnown = cityIsKnown(uncheckedCity);
     if (cityKnown) {
         console.log("city known");
         createWeatherRequest(cityKnown);
@@ -115,21 +122,17 @@ function processCityName(uncheckedCity) {
         createCoordinateRequest(uncheckedCity);
     }
 }
-
 // checkIfCityIsKnown(string) loop through the array of stored cityname and coordsinate object
 // return the coordinate object if it matches the name, else return false
-function checkIfCityIsKnown(cityString) {
+function cityIsKnown(cityString) {
     let cityKnown = false;
     for(let city of knownCities) {
         if(city.city === cityString) {
             cityKnown = city;
         }
     }
-    console.log("city check");
-    console.log(cityKnown);
     return cityKnown;
 }
-
 // createCoodinateRequest(city name string) : create a coordinate request string and pass it on to the specific fetch procedure
 function createCoordinateRequest(unknownCity) {
     let apiGeocodingDirectCall = `http://api.openweathermap.org/geo/1.0/direct?q=${unknownCity}&limit=${limit}&appid=${apiKey}`;
@@ -200,7 +203,7 @@ function createSearchedCityPanelHTMLString() {
     return panel;
 }
 
-// Sorry dead code and tears and revived code below
+// Sorry code, dead code, tears and revived code below
 /* test local storage */
 // let test = new VisitedCities;
 // console.log(test);
