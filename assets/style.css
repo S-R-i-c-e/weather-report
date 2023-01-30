@@ -4,50 +4,41 @@
       --secondary-color: #b887eb;
       --tertiary-color: #FFFB4C;
     }
-
-    /* Reflow Styling */
+    /* Reflow Styling - cribbed from W3C site - little functionality left*/
     header[role="banner"] {
       grid-area: header;
     }
-
     main[role="main"] {
       grid-area: main;
     }
-
     .grid,
     .subgrid {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
     }
-
     .grid {
       grid-template-areas:
         'header'
         'main';
       width: 100%;
     }
-
     .subgrid {
       width: calc(100% + 2rem);
       margin: 0 -1rem;
     }
-
     .grid-item,
     .subgrid-item {
       padding: 1rem;
     }
-
     @media all and (min-width: 576px) {
       .subgrid {
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         margin-bottom: 1rem;
       }
-
       .subgrid-item {
         padding-bottom: 0.25rem;
       }
     }
-
     @media all and (min-width: 992px) {
       .grid {
         grid-template-areas:
@@ -56,34 +47,26 @@
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
       }
     }
-
     /* Content Styling */
-
     html {
       box-sizing: border-box;
     }
-
     body {
       font-family: 'Poppins', sans-serif;
       background-color: var(--primary-color);
       margin: 0;
     }
-
-    h1,
-    h2 {
-      color: #005a6a;
+    h1, h2, input {
+      color: #0d5203;
     }
-
     h1 {
       font-size: 2rem;
       margin: 0;
     }
-
     h2 {
       font-size: 1.5rem;
       margin-top: 0;
     }
-
     input {
       font-family: 'Poppins', sans-serif;
       background-color: bisque;
@@ -92,7 +75,9 @@
       background-color: var(--tertiary-color);
       margin-top: 1rem;
     }
-
+    ul {
+        list-style-type: none;
+    }
     .panel {
       background-color: var(--secondary-color);
       border: 1px solid #ddd;

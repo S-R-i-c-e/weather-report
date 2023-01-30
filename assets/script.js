@@ -2,7 +2,7 @@
 const limit = "2"; // limit returned names from place name request
 let lat = undefined;
 let lon = undefined;
-
+const apiKey = "b815fef6c88c1e911e03dd1ab36f7ad3";
 // Data related variables and code
 const localCities = "knownCities"; // name of locally stored cities object
 let knownCities = JSON.parse(localStorage.getItem(localCities) || "[]"); // 'list' of previously searched cities - stores CityCoordinates instances
@@ -90,10 +90,23 @@ class WeatherReports {
             date: convertDate(this._reports[forecastIndex].dt_txt),
             imgSrc: createIconSrc(this._reports[forecastIndex].weather[0].icon),
             temperature: Math.round(this._reports[forecastIndex].main.temp),
-            humidity: this._reports[forecastIndex].main.humidity,
-           
+            humidity: this._reports[forecastIndex].main.humidity,          
         }
     }
+ /*
+    *fiveDaysReports() {
+        for(index=1; index <=5; i++) {
+            yield {
+                date: convertDate(this._reports[0].dt_txt),
+                imgSrc: createIconSrc(this._reports[0].weather[0].icon),
+                temperature: Math.round(this._reports[0].main.temp),
+                humidity: this._reports[0].main.humidity,
+                windSpeed: Math.round(this._reports[0].wind.speed),
+                   
+            }
+        }
+    }
+    */
 }
 // a couple of utility functions to format WeatherReport specific return data
 // convertDate - change openWeather date and time string and return UK style date string
@@ -191,16 +204,16 @@ function fetchWeather(queryURL) {
 }
 // processWeather(data object returned from OpenWeather query) :  
 function processWeather(rawWeatherData) {
-    let fiveDayReport = new WeatherReports(rawWeatherData); // WeatherReports class constructor extracts pertinent data
-    todaysWeather(fiveDayReport);
-    fiveDaysWeather(fiveDayReport);
-
+    let sixDayReport = new WeatherReports(rawWeatherData); // WeatherReports class constructor extracts pertinent data
+    todaysWeather(sixDayReport);
+    fiveDaysWeather(sixDayReport);
 }
 function todaysWeather(weatherReport) {
     let currentReport = weatherReport.currentReport;
     let currentWeatherHTMLString = createCurrentWeatherPanel(currentReport); // WeatherReports method creates HTML string for the current weather panel     
     currentWeatherHTML.innerHTML = "";                                              // clear the current weather panel
     currentWeatherHTML.innerHTML = currentWeatherHTMLString;                        // set the current weather panel
+
 }
 // createCurrentWeatherPanel(tailored-current-weather-data) create HTML elements string to be inserted .innnerHTL into current weather panel
 function createCurrentWeatherPanel(currentWeatherObject) {
@@ -218,9 +231,20 @@ function createSearchedCityPanelHTMLString() {
     return panel;
 }
 function fiveDaysWeather(weatherReport) {
-    console.log("it's weather!")
+    fiveDayWeatherHTML.innerHTML = "";  // clear the panel
+    for(day=1; day<=5; day++) {
+        let fiveDayData = weatherReport.forecast(day);
+        let fiveDayHTMLString = createForecastPanel(fiveDayData);
+        fiveDayWeatherHTML.innerHTML += fiveDayHTMLString;                        // set the current weather panel      
+    }
 }
 
+function createForecastPanel(FiveDayWeatherObject) {
+    return `<p>${FiveDayWeatherObject.date}</p>
+    <img src="${FiveDayWeatherObject.imgSrc}">          
+    <p><span>Temp : ${FiveDayWeatherObject.temperature}°C</span>
+    <p>humidity : ${FiveDayWeatherObject.humidity}%</p>`    
+}
 // Sorry code, dead code, tears and revived code below
 /* test local storage */
 // let test = new VisitedCities;
