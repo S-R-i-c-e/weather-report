@@ -18,12 +18,11 @@
         <div class="subgrid-item">
           <div class="panel">
             <h2>Search</h2>
-            <form id="city-input">
+            <form id="city-input" onsubmit="citySearchInput()">
               <label for="city-search">Enter a city name to search:</label>
               <br>
               <input type="text" name="city-search">
-              </input>
-              <input type="button" onclick="citySearchInput()" value="Submit" />
+              <input type="button" onclick="citySearchInput()" value="submit">
             </form>
             <br>
             <label class="hidden" for="city-list">Or choose a city from the list:</label>

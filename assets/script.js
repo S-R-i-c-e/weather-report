@@ -15,10 +15,17 @@ let fiveDayWeatherHTML = document.getElementById("five-day-forecast");
 
 // cityCoordinates class to contain Open Weather city coordinates.
 class CityCoordinates {
-    constructor(coordinateData) {
-        this._city = coordinateData[0].name;
-        this._coordinates = [coordinateData[0].lon, coordinateData[0].lat];       
-    }
+    constructor(city, longitude, latitude) {
+        this._city = city;
+        this._coordinates = [longitude, latitude];
+      }
+      // 'constructor' for converting Open Weather Geo data into this coordinate classinstance
+      static openWeatherGeoDataConstructor (rawOpenWeatherDataObject) {
+        return new CityCoordinates(rawOpenWeatherDataObject[0].name,     // extract city name
+                                    rawOpenWeatherDataObject[0].lon,    // extract longitude
+                                    rawOpenWeatherDataObject[0].lat);  // extract latitude
+      }
+
     set city(cityName) {
         this._city = cityName;
     }
@@ -33,6 +40,18 @@ class CityCoordinates {
     }
     get latitude() {
         return this._coordinates[1];
+    }
+    // comparison method for alphabetic sorting by city name
+    alphaComparison(comparisonCoordinate) {
+        let thisCity = this._city;
+        let thatCity = comparisonCoordinate.city;
+        if (thisCity < thatCity) {
+            return -1;
+        } else if (thisCity == thatCity) {
+            return 0;
+        } else {
+            return 1;
+        }
     }
     toString() {
         return `city: ${this._city}
@@ -93,21 +112,29 @@ class WeatherReports {
             humidity: this._reports[forecastIndex].main.humidity,          
         }
     }
- /*
-    *fiveDaysReports() {
-        for(index=1; index <=5; i++) {
-            yield {
-                date: convertDate(this._reports[0].dt_txt),
-                imgSrc: createIconSrc(this._reports[0].weather[0].icon),
-                temperature: Math.round(this._reports[0].main.temp),
-                humidity: this._reports[0].main.humidity,
-                windSpeed: Math.round(this._reports[0].wind.speed),
-                   
-            }
-        }
-    }
-    */
 }
+// class KnownCities - a static list to encapsulate the list of searched cities
+class KnownCities {
+    static _dataStoreName; // string to hold name of localStorage object
+    static _knownCoordinates; // array to hold coordinate objects
+  
+    static initialize(localDataStore) {
+      KnownCities._dataStoreName = localDataStore;
+      KnownCities._knownCoordinates = JSON.parse(localStorage.getItem(KnownCities._dataStoreName)) || [];
+    }
+    // push a coordinate object onto the list
+    static addCoordinate(coordinate) {
+      KnownCities._knownCoordinates.push(coordinate);
+    }
+    
+    static sort() {
+      KnownCities._knownCoordinates.sort(function(a,b){return a.alphaComparison(b)}); // Sweet!
+    } 
+  
+    static toString() {
+      return KnownCities._knownCoordinates.map(city => city.toString()).join(" \n ");
+    }
+  }
 // a couple of utility functions to format WeatherReport specific return data
 // convertDate - change openWeather date and time string and return UK style date string
 function convertDate(openDate) {
@@ -171,7 +198,10 @@ function fetchCoordinates(queryURL) {
 // process coordinate data object returned from openWeather Geolocation query
 function processCoordinates(rawCoordinates) {
     console.log(rawCoordinates);
+    let newCoordinates = CityCoordinates.openWeatherGeoDataConstructor(rawCoordinates); //constructor specific to OpenWeatherGeo object
+/* original coordinate construcyion call    
     let newCoordinates = new CityCoordinates(rawCoordinates); // create object to contain the data we want {name, longitude, latitude}
+*/
     addToKnownCities(newCoordinates);       // add coordinates to the list and storage
     createWeatherRequest(newCoordinates);
 }

@@ -12,7 +12,7 @@ class CityCoordinates {
                                   rawOpenWeatherDataObject[0].lat);  // extract latitude
     }
     // comparison method for alphabetic sorting by city name
-    preceedsAlphabetically(comparisonCoordinate) {
+    alphaComparison(comparisonCoordinate) {
       let thisCity = this._city;
       let thatCity = comparisonCoordinate.city;
       if (thisCity < thatCity) {
@@ -97,55 +97,7 @@ class CityCoordinates {
   //console.log("Berlin - Berlan ? "  + (str1 - str 2));
   
   console.log("Coordinate class test - a=Berlin, b=Berlim");
-  console.log("Berlin preceeds Berlim ? " + a.preceedsAlphabetically(b));
-  console.log("Berlim preceeds Berlin ? " + b.preceedsAlphabetically(a));
+  console.log("Berlin preceeds Berlim ? " + a.alphaComparison(b));
+  console.log("Berlim preceeds Berlin ? " + b.alphaComparison(a));
   
   
-  /*
-  
-    get knownCities() {
-      return this._previouslyVisited;
-    }
-  
-    set previouslyVistied(citiesCoordinates) {
-      this._previouslyVisited = citiesCoordinates;
-    }
-  
-  
-    addCity(cityCoordinate) {
-    }
-   
-  }
-  
-  function insert(data, [...arr]) {
-  
-    let insertionIndex = insertion(data, arr, 0);
-    
-    return insertionIndex;
-  
-    function insertion(data, [...arr], index) {
-      return 10;
-    }
-  
-  }
-  
-  
-    let insertionIndex = insertion(data, arr, 0);
-  
-    return insertionIndex;
-  
-    function insertion(data, ...arr, index) {
-  
-      if(arr.length = 0 || data < arr[0]) {
-        return index;
-      } else {
-        insertion(data, arr.splice(0,1), index+1);
-      }
-  
-    return 10;
-    }
-  
-  }
-  */ 
-    
-      
