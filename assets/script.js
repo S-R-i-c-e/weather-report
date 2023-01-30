@@ -213,16 +213,22 @@ function todaysWeather(weatherReport) {
     let currentWeatherHTMLString = createCurrentWeatherPanel(currentReport); // WeatherReports method creates HTML string for the current weather panel     
     currentWeatherHTML.innerHTML = "";                                              // clear the current weather panel
     currentWeatherHTML.innerHTML = currentWeatherHTMLString;                        // set the current weather panel
-
 }
 // createCurrentWeatherPanel(tailored-current-weather-data) create HTML elements string to be inserted .innnerHTL into current weather panel
 function createCurrentWeatherPanel(currentWeatherObject) {
     return `<p>${currentWeatherObject.city} ${currentWeatherObject.date}</p>
-            <img src="${currentWeatherObject.imgSrc}">          
-            <p><span>Temp : ${currentWeatherObject.temperature}°C</span>
-            <p>humidity : ${currentWeatherObject.humidity}%</p>
-            <p>wind speed : ${currentWeatherObject.windSpeed}m/s</p>`
+    <hr>
+    <img src="${currentWeatherObject.imgSrc}">          
+    <p>Temp : ${currentWeatherObject.temperature}°C &emsp;
+    humidity : ${currentWeatherObject.humidity}%</p>
+    <p>wind speed : ${currentWeatherObject.windSpeed}m/s</p>`
 }
+//     return `<p>${currentWeatherObject.city} ${currentWeatherObject.date}</p>
+//             <img src="${currentWeatherObject.imgSrc}">          
+//             <p><span>Temp : ${currentWeatherObject.temperature}°C</span>
+//             <p>humidity : ${currentWeatherObject.humidity}%</p>
+//             <p>wind speed : ${currentWeatherObject.windSpeed}m/s</p>`
+// }
 function createSearchedCityPanelHTMLString() {
     let panel = "";
     for(let city of knownCities) {
@@ -240,10 +246,12 @@ function fiveDaysWeather(weatherReport) {
 }
 
 function createForecastPanel(FiveDayWeatherObject) {
-    return `<p>${FiveDayWeatherObject.date}</p>
+    return `<div class="five-day-subpanel">
+    <p>${FiveDayWeatherObject.date}</p>
     <img src="${FiveDayWeatherObject.imgSrc}">          
-    <p><span>Temp : ${FiveDayWeatherObject.temperature}°C</span>
-    <p>humidity : ${FiveDayWeatherObject.humidity}%</p>`    
+    <p>Temp : ${FiveDayWeatherObject.temperature}°C &emsp; 
+    <p>humidity : ${FiveDayWeatherObject.humidity}%</p>
+    </div>`    
 }
 // Sorry code, dead code, tears and revived code below
 /* test local storage */
