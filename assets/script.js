@@ -151,7 +151,7 @@ function cityIsKnown(cityString) {
 }
 // createCoodinateRequest(city name string) : create a coordinate request string and pass it on to the specific fetch procedure
 function createCoordinateRequest(unknownCity) {
-    let apiGeocodingDirectCall = `http://api.openweathermap.org/geo/1.0/direct?q=${unknownCity}&limit=${limit}&appid=${apiKey}`;
+    let apiGeocodingDirectCall = `https://api.openweathermap.org/geo/1.0/direct?q=${unknownCity}&limit=${limit}&appid=${apiKey}`;
     fetchCoordinates(apiGeocodingDirectCall);
 }
 // fetch coordinates
